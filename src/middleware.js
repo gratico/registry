@@ -6,7 +6,7 @@ const URLFormat = /^\/((?:@[^\/@]+\/)?[^\/@]+)(?:@([^\/]+))?(\/.*)?$/
 export function packageURLMiddleware(req, res, next) {
   const { pathname, search, query } = url.parse(req.url, true)
   console.log(pathname)
-  if (pathname[1] !== '~' || pathname === '/') {
+  if (pathname[1] !== '~' || pathname !== '/') {
     const match = URLFormat.exec(pathname)
 
     if (match === null) {
