@@ -12,10 +12,6 @@ const server = express()
 server.use(compression())
 server.use(cors())
 server.use(bodyParser.json())
-server.use(packageURLMiddleware)
-
-server.use('/:ns/:n/:v', router)
-server.use('/:n/:v', router)
 
 const oneYear = 60 * 1000 * 60 * 24 * 365
 server.use(
@@ -36,6 +32,10 @@ server.use(
 server.get('/', (req, res) => {
   res.json({})
 })
+
+server.use(packageURLMiddleware)
+server.use('/:ns/:n/:v', router)
+server.use('/:n/:v', router)
 
 const port = process.env.PORT || 5200
 server.listen(port, (err) => {
