@@ -31,7 +31,7 @@ router.get('/types', async (req, res) => {
 
 router.get('/build', async (req, res) => {
   const pkg = { name: req.packageName, version: req.packageVersion }
-  const output = await build()
+  const output = await build(pkg)
   res.json(output)
 })
 
