@@ -177,7 +177,7 @@ export async function bundle(pkg, main) {
   }
 
   // create a bundle
-  console.log('bundle ', inputOptions)
+  console.log('bundle ', pkg)
 
   const bundle = await rollup(inputOptions)
   const { output } = await bundle.generate(outputOptions)
