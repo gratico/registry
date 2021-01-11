@@ -3,10 +3,32 @@ import path from 'path'
 import process from 'process'
 import glob from 'glob'
 import cjsPlugin from '@rollup/plugin-commonjs'
+import flowPlugin from 'rollup-plugin-flow'
+import nodeResolvePlugin from '@rollup/plugin-node-resolve'
+import jsonPlugin from '@rollup/plugin-json'
 import { spawnChild } from './process.js'
 import fs from 'fs'
 import { promisify } from 'util'
+import logicalTree from 'npm-logical-tree'
+import async from 'async'
+import crawl from 'tree-crawl'
 
+const ignoreFlowPlugin = () => {
+  return {
+    name: 'ignoreflow',
+    transform(code, id) {
+      const line = (code || '').split(/\r?\n/)[0] || ''
+      if (line.match(/@flow/)) {
+        return {
+          code: ``
+        }
+      } else {
+        return { code }
+      }
+    }
+  }
+}
+const plugins = [jsonPlugin(), nodeResolvePlugin(), ignoreFlowPlugin(), cjsPlugin()]
 export function getFolderRoot(...paths) {
   if (process.env.NPM_ROOT) {
     const p = path.join(...[process.env.NPM_ROOT, ...(paths || [])])
@@ -61,6 +83,48 @@ export async function download(pkg) {
   })
 }
 
+export function getFlattenedTree(lTree) {
+  const nodes = []
+  console.log(lTree)
+  crawl(
+    lTree,
+    (node) => {
+      if (node.address !== '') {
+        nodes.push({
+          name: node.name,
+          version: node.version
+        })
+      }
+    },
+    {
+      getChildren: (node) => {
+        console.log('n', node)
+        return node.dependencies ? [...node.dependencies.values()] : []
+      }
+    }
+  )
+  return nodes
+}
+
+export async function install(job) {
+  const { manifest, lockfile } = job
+  const lTree = logicalTree(manifest, lockfile)
+  const nodes = getFlattenedTree(lTree)
+  console.log(nodes.length)
+  const tasks = nodes.map((pkg) => {
+    return async (cb) => {
+      try {
+        await forkAndBuild(pkg)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+  })
+  const resp = await async.parallelLimit(tasks, 10)
+  console.log('r', resp)
+  return resp
+}
+
 export async function ensureDownload(pkg) {
   const exists = await isDownloaded(pkg)
   if (exists) return
@@ -75,7 +139,7 @@ export async function build(pkg) {
 
   const inputOptions = {
     input: glob.sync(pkgPath + '/**/*.js'),
-    plugins: cjsPlugin(),
+    plugins,
     treeshake: false
   }
   const outputOptions = {
@@ -85,48 +149,42 @@ export async function build(pkg) {
   }
   // create a bundle
 
-  console.log('build')
   const bundle = await rollup(inputOptions)
   const { output } = await bundle.generate(outputOptions)
-  console.log('build done')
-  await bundle.write(outputOptions)
 
-  console.log('build written')
+  await bundle.write(outputOptions)
 
   // closes the bundle
   await bundle.close()
-  console.log('build closed')
+
   return outputOptions
 }
 
 export async function bundle(pkg, main) {
   const { name: pkgName, version: pkgVersion } = pkg
   await ensureDownload(pkg)
-  console.log('m', main)
 
   const pkgPath = getFolderRoot('pkgs', `${pkgName}@${pkgVersion}`)
 
   const inputOptions = {
     input: path.join(pkgPath, main || 'index.js'),
-    plugins: cjsPlugin(),
+    plugins,
     treeshake: false
   }
   const outputOptions = {
     file: getFolderRoot('built', `${pkgName}@${pkgVersion}`, 'esm.js'),
     format: 'esm'
   }
-  console.log(inputOptions, outputOptions)
+
   // create a bundle
+  console.log('bundle ', inputOptions)
 
   const bundle = await rollup(inputOptions)
-  console.log('bundle ')
   const { output } = await bundle.generate(outputOptions)
-  console.log('bundle generated')
+
   await bundle.write(outputOptions)
-  console.log('bundle write')
 
   // closes the bundle
   await bundle.close()
-  console.log('bundle closed')
   return outputOptions
 }

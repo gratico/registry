@@ -7,13 +7,21 @@ import path from 'path'
 import mime from 'mime'
 import { router } from './routes.js'
 import { packageURLMiddleware } from './middleware.js'
-import { getFolderRoot } from './utils.js'
+import { getFolderRoot, install } from './utils.js'
+import morgan from 'morgan'
 const server = express()
+server.use(morgan('tiny'))
 server.use(compression())
 server.use(cors())
 server.use(bodyParser.json())
 
 const oneYear = 60 * 1000 * 60 * 24 * 365
+
+server.post('/~/install', async (req, res) => {
+  const resp = await install(req.body)
+  res.json(resp)
+})
+
 server.use(
   '/~',
   express.static(getFolderRoot(), {
