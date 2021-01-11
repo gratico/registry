@@ -68,7 +68,7 @@ export async function build(pkg) {
 
   // closes the bundle
   await bundle.close()
-  return output
+  return outputOptions
 }
 
 export async function bundle(pkg) {
@@ -90,11 +90,10 @@ export async function bundle(pkg) {
   // create a bundle
 
   const bundle = await rollup(inputOptions)
-  const { output } = await bundle.generate(outputOptions)
-  console.log(output)
+  await bundle.generate(outputOptions)
   await bundle.write(outputOptions)
 
   // closes the bundle
   await bundle.close()
-  return output
+  return outputOptions
 }
