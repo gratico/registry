@@ -6,9 +6,12 @@ install:
 start:
 	node ./src/index.js --experimental-modules
 
+.PHONY: build-package
+build-package:
+	node ./src/builder.js  --experimental-modules
+
 .PHONY: download-package
 download-package:
-	pwd
 	mkdir -p ${ROOT_DIR}/manifests/${NPM_PACKAGE_NAME}@${NPM_PACKAGE_VERSION}
 	mkdir -p ${ROOT_DIR}/pkgs/${NPM_PACKAGE_NAME}@${NPM_PACKAGE_VERSION}
 	mkdir -p ${ROOT_DIR}/npm/${NPM_PACKAGE_NAME}@${NPM_PACKAGE_VERSION}

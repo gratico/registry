@@ -1,9 +1,10 @@
 import express from 'express'
-import { build, bundle, download, isDownloaded, ensureDownload, getFolderRoot } from './utils.js'
+import { download, isDownloaded, ensureDownload, getFolderRoot } from './utils.js'
 import qs from 'qs'
 import fs from 'fs'
 import { promisify } from 'util'
 import glob from 'glob'
+import { spawnChild } from './process.js'
 
 export const router = express.Router()
 
@@ -17,8 +18,15 @@ router.get('/manifest', async (req, res) => {
   const output = await promisify(fs.readFile)(pkgPath, 'utf8')
   const manifest = JSON.parse(output)
   if (!exists) {
-    await build(pkg)
-    await bundle(pkg, manifest.module || manifest.main)
+    await spawnChild('make', ['build-package'], {
+      env: {
+        PATH: process.env.PATH,
+        NPM_PACKAGE_NAME: pkg.name,
+        NPM_PACKAGE_VERSION: pkg.version,
+        NPM_PACKAGE_MAIN: manifest.module || manifest.main,
+        ROOT_DIR: getFolderRoot()
+      }
+    })
   }
   res.json(manifest)
 })
