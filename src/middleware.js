@@ -8,7 +8,7 @@ export function packageURLMiddleware(req, res, next) {
 
   if (pathname.slice(0, 4) !== '/npm') return next()
 
-  const parts = pathname.slice(4).split('/')
+  const parts = pathname.slice(5).split('/')
   console.log('p', parts)
   if (!parts || parts.length < 2) return next()
 
