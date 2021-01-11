@@ -1,5 +1,5 @@
 import express from 'express'
-import { build, bundle, download, isDownloaded, getFolderRoot } from './utils.js'
+import { build, bundle, download, isDownloaded, ensureDownload, getFolderRoot } from './utils.js'
 import qs from 'qs'
 import fs from 'fs'
 import { promisify } from 'util'
@@ -18,7 +18,7 @@ router.get('/manifest', async (req, res) => {
   const manifest = JSON.parse(output)
   if (!exists) {
     await build(pkg)
-    await bundle(pkg, manifest.browser || manifest.module || manifest.main)
+    await bundle(pkg, manifest.module || manifest.main)
   }
   res.json(manifest)
 })
