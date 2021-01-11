@@ -10,7 +10,7 @@ import { promisify } from 'util'
 export function getFolderRoot(...paths) {
   if (process.env.NPM_ROOT) {
     const p = path.join(...[process.env.NPM_ROOT, ...(paths || [])])
-    console.log(p)
+
     return p
   } else {
     return path.join(...[process.cwd(), 'public', ...(paths || [])])
@@ -64,7 +64,6 @@ export async function build(pkg) {
 
   const bundle = await rollup(inputOptions)
   const { output } = await bundle.generate(outputOptions)
-  console.log(output)
   await bundle.write(outputOptions)
 
   // closes the bundle
