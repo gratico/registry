@@ -83,12 +83,17 @@ export async function build(pkg) {
   }
   // create a bundle
 
+  console.log('build')
   const bundle = await rollup(inputOptions)
   const { output } = await bundle.generate(outputOptions)
+  console.log('build done')
   await bundle.write(outputOptions)
+
+  console.log('build written')
 
   // closes the bundle
   await bundle.close()
+  console.log('build closed')
   return outputOptions
 }
 
@@ -108,13 +113,18 @@ export async function bundle(pkg, main) {
     file: getFolderRoot('built', `${pkgName}@${pkgVersion}`, 'esm.js'),
     format: 'esm'
   }
+  console.log(inputOptions, outputOptions)
   // create a bundle
 
   const bundle = await rollup(inputOptions)
+  console.log('bundle ')
   const { output } = await bundle.generate(outputOptions)
+  console.log('bundle generated')
   await bundle.write(outputOptions)
+  console.log('bundle write')
 
   // closes the bundle
   await bundle.close()
+  console.log('bundle closed')
   return outputOptions
 }
