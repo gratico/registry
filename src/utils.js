@@ -9,7 +9,9 @@ import { promisify } from 'util'
 
 export function getFolderRoot(...paths) {
   if (process.env.NPM_ROOT) {
-    return path.join(...[process.env.NPM_ROOT, ...(paths || [])])
+    const p = path.join(...[process.env.NPM_ROOT, ...(paths || [])])
+    console.log(p)
+    return p
   } else {
     return path.join(...[process.cwd(), 'public', ...(paths || [])])
   }
