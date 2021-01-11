@@ -3,15 +3,44 @@ import path from 'path'
 import process from 'process'
 import glob from 'glob'
 import cjsPlugin from '@rollup/plugin-commonjs'
+import { spawnChild } from './process.js'
+import fs from 'fs'
+import { promisify } from 'util'
+export function getFolderRoot(...paths) {
+  return path.join(...[process.cwd(), ...paths])
+}
 
-export async function isDownloaded(pkg) {}
+export async function isDownloaded(pkg) {
+  const pkgPath = getFolderRoot('public', 'pkgs', pkg.name + '@' + pkg.version, 'package.json')
+  try {
+    const resp = await promisify(fs.stat)(pkgPath)
+    return !!resp
+  } catch (e) {
+    return false
+  }
+}
 
-export async function download(pkg) {}
+export async function download(pkg) {
+  await spawnChild('make', ['download-package'], {
+    env: {
+      PATH: process.env.PATH,
+      NPM_PACKAGE_NAME: pkg.name,
+      NPM_PACKAGE_VERSION: pkg.version
+    }
+  })
+}
+
+export async function ensureDownload(pkg) {
+  const exists = await isDownloaded(pkg)
+  if (exists) return
+  return download(pkg)
+}
 
 export async function build(pkg) {
   const { name: pkgName, version: pkgVersion } = pkg
+  await ensureDownload(pkg)
 
-  const pkgPath = path.join(process.cwd(), 'public', 'pkgs', `${pkgName}@${pkgVersion}`)
+  const pkgPath = getFolderRoot('public', 'pkgs', `${pkgName}@${pkgVersion}`)
 
   const inputOptions = {
     input: glob.sync(pkgPath + '/**/*.js'),
@@ -20,7 +49,7 @@ export async function build(pkg) {
   }
   const outputOptions = {
     preserveModules: true,
-    dir: path.join(process.cwd(), 'public', 'npm', `${pkgName}@${pkgVersion}`),
+    dir: getFolderRoot('public', 'npm', `${pkgName}@${pkgVersion}`),
     format: 'esm'
   }
   // create a bundle
@@ -37,8 +66,9 @@ export async function build(pkg) {
 
 export async function bundle(pkg) {
   const { name: pkgName, version: pkgVersion, main } = pkg
+  await ensureDownload(pkg)
 
-  const pkgPath = path.join(process.cwd(), 'public', 'pkgs', `${pkgName}@${pkgVersion}`)
+  const pkgPath = getFolderRoot('public', 'pkgs', `${pkgName}@${pkgVersion}`)
 
   const inputOptions = {
     input: path.join(pkgPath, main),
@@ -47,7 +77,7 @@ export async function bundle(pkg) {
   }
   const outputOptions = {
     preserveModules: true,
-    file: path.join(process.cwd(), 'public', 'built', `${pkgName}@${pkgVersion}`, 'esm.js'),
+    file: getFolderRoot('public', 'built', `${pkgName}@${pkgVersion}`, 'esm.js'),
     format: 'esm'
   }
   // create a bundle
