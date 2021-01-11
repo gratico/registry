@@ -5,35 +5,25 @@ const URLFormat = /^\/((?:@[^\/@]+\/)?[^\/@]+)(?:@([^\/]+))?(\/.*)?$/
 
 export function packageURLMiddleware(req, res, next) {
   const { pathname, search, query } = url.parse(req.url, true)
-  console.log(pathname)
-  if (pathname.slice(0, 4) === '/npm') {
-    const match = URLFormat.exec(pathname.slice(4))
 
-    if (match === null) {
-      return res.status(400).type('text').send(`Invalid URL: ${req.url}`)
-    }
+  if (pathname.slice(0, 4) !== '/npm') return next()
 
-    const packageName = match[1]
-    const packageVersion = tryDecode(match[2]) || 'latest'
-    const filename = tryDecode(match[3])
-    const errors = validateNPMPackageName(packageName).errors
+  const parts = pathname.slice(4).split('/')
+  console.log('p', parts)
+  if (!parts || parts.length < 2) return next()
 
-    if (errors) {
-      return res
-        .status(400)
-        .type('text')
-        .send(`Invalid package name: ${packageName} (${errors.join(', ')})`)
-    }
-
-    req.packageName = packageName
-    req.packageVersion = packageVersion
-    req.packageSlug = `${packageName}@${packageVersion}`
-    console.log(req.packageSlug)
-    req.pathname = pathname
-    req.filename = filename
-    req.search = search
-    req.query = query
+  const [first, second, third] = parts
+  let packageName = first
+  let packageVersion = second
+  if (first[0] === '@') {
+    packageName = first + '/' + second
+    packageVersion = third
   }
+
+  req.packageName = packageName
+  req.packageVersion = packageVersion
+  req.packageSlug = `${packageName}@${packageVersion}`
+  req.pathname = pathname
   next()
 }
 
