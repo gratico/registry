@@ -33,6 +33,10 @@ server.use(
   serveIndex('public', { icons: true })
 )
 
+server.get('/', (req, res) => {
+  res.json({})
+})
+
 const port = process.env.PORT || 5200
 server.listen(port, (err) => {
   console.log('listening on port', port)

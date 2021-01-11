@@ -90,7 +90,7 @@ export async function bundle(pkg) {
   // create a bundle
 
   const bundle = await rollup(inputOptions)
-  await bundle.generate(outputOptions)
+  const { output } = await bundle.generate(outputOptions)
   await bundle.write(outputOptions)
 
   // closes the bundle
