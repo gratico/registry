@@ -34,8 +34,8 @@ server.get('/', (req, res) => {
 })
 
 server.use(packageURLMiddleware)
-server.use('/:ns/:n/:v', router)
-server.use('/:n/:v', router)
+server.use('/npm/:ns/:n/:v', router)
+server.use('/npm/:n/:v', router)
 
 const port = process.env.PORT || 5200
 server.listen(port, (err) => {
