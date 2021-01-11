@@ -28,7 +28,7 @@ const ignoreFlowPlugin = () => {
     }
   }
 }
-const plugins = [jsonPlugin(), nodeResolvePlugin(), ignoreFlowPlugin(), cjsPlugin()]
+const plugins = [jsonPlugin(), ignoreFlowPlugin(), cjsPlugin()]
 export function getFolderRoot(...paths) {
   if (process.env.NPM_ROOT) {
     const p = path.join(...[process.env.NPM_ROOT, ...(paths || [])])
