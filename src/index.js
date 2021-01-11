@@ -26,7 +26,7 @@ server.use(
       }
     }
   }),
-  serveIndex('public', { icons: true })
+  serveIndex(getFolderRoot(), { icons: true })
 )
 
 server.get('/', (req, res) => {
