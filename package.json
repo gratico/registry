@@ -54,7 +54,8 @@
     "qs": "^6.9.4",
     "react": "^17.0.1",
     "rollup": "^2.36.1",
-    "serve-index": "^1.9.1"
+    "serve-index": "^1.9.1",
+    "validate-npm-package-name": "^3.0.0"
   },
   "devDependencies": {}
 }
