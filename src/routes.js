@@ -10,6 +10,7 @@ export const router = express.Router()
 router.get('/manifest', async (req, res) => {
   const pkg = { name: req.packageName, version: req.packageVersion }
   await ensureDownload(pkg)
+  await build(pkg)
   const pkgPath = getFolderRoot('pkgs', pkg.name + '@' + pkg.version, 'package.json')
   const output = await promisify(fs.readFile)(pkgPath, 'utf8')
   res.json(JSON.parse(output))
