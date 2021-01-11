@@ -36,15 +36,3 @@ router.get('/types', async (req, res) => {
   const output = await download(pkg)
   res.json(output)
 })
-
-router.get('/build', async (req, res) => {
-  const pkg = { name: req.packageName, version: req.packageVersion }
-  const output = await build(pkg)
-  res.json(output)
-})
-
-router.get('/bundle', async (req, res) => {
-  const pkg = { name: req.packageName, version: req.packageVersion, main: 'index.js' }
-  const output = await bundle(pkg)
-  res.json(output)
-})
