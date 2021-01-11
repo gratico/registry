@@ -79,7 +79,7 @@ export async function bundle(pkg, main) {
   const pkgPath = getFolderRoot('pkgs', `${pkgName}@${pkgVersion}`)
 
   const inputOptions = {
-    input: path.join(pkgPath, main),
+    input: path.join(pkgPath, main || 'index.js'),
     plugins: cjsPlugin(),
     treeshake: false
   }
