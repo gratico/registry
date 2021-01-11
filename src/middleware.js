@@ -5,8 +5,8 @@ const URLFormat = /^\/((?:@[^\/@]+\/)?[^\/@]+)(?:@([^\/]+))?(\/.*)?$/
 
 export function packageURLMiddleware(req, res, next) {
   const { pathname, search, query } = url.parse(req.url, true)
-
-  if (pathname.match(/\/npm\/(.*)/)) {
+  console.log(pathname)
+  if (pathname[1] === '~') {
     return next()
   }
 
@@ -31,6 +31,7 @@ export function packageURLMiddleware(req, res, next) {
   req.packageName = packageName
   req.packageVersion = packageVersion
   req.packageSlug = `${packageName}@${packageVersion}`
+  console.log(req.packageSlug)
   req.pathname = pathname
   req.filename = filename
   req.search = search

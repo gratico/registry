@@ -19,7 +19,7 @@ server.use('/:n/:v', router)
 
 const oneYear = 60 * 1000 * 60 * 24 * 365
 server.use(
-  '/npm',
+  '/~',
   express.static(getFolderRoot(), {
     maxAge: oneYear,
     setHeaders: function (res, p, stat) {
