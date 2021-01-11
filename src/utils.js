@@ -84,7 +84,6 @@ export async function bundle(pkg, main) {
     treeshake: false
   }
   const outputOptions = {
-    preserveModules: true,
     file: getFolderRoot('built', `${pkgName}@${pkgVersion}`, 'esm.js'),
     format: 'esm'
   }
