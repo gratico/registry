@@ -38,6 +38,7 @@ export async function forkAndBuild(pkg) {
   if (!exists) {
     const resp = await spawnChild('make', ['build-package'], {
       env: {
+        NPM_ROOT: process.env.NPM_ROOT,
         PATH: process.env.PATH,
         NPM_PACKAGE_NAME: pkg.name,
         NPM_PACKAGE_VERSION: pkg.version,
@@ -51,6 +52,7 @@ export async function forkAndBuild(pkg) {
 export async function download(pkg) {
   await spawnChild('make', ['download-package'], {
     env: {
+      NPM_ROOT: process.env.NPM_ROOT,
       PATH: process.env.PATH,
       NPM_PACKAGE_NAME: pkg.name,
       NPM_PACKAGE_VERSION: pkg.version,
