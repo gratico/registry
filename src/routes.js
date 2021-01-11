@@ -1,5 +1,5 @@
 import express from 'express'
-import { build, bundle, download, ensureDownload, getFolderRoot } from './utils.js'
+import { build, bundle, download, isDownloaded, getFolderRoot } from './utils.js'
 import qs from 'qs'
 import fs from 'fs'
 import { promisify } from 'util'
@@ -9,11 +9,18 @@ export const router = express.Router()
 
 router.get('/manifest', async (req, res) => {
   const pkg = { name: req.packageName, version: req.packageVersion }
-  await ensureDownload(pkg)
-  await build(pkg)
+  const exists = await isDownloaded(pkg)
+  if (!exists) {
+    await download(pkg)
+  }
   const pkgPath = getFolderRoot('pkgs', pkg.name + '@' + pkg.version, 'package.json')
   const output = await promisify(fs.readFile)(pkgPath, 'utf8')
-  res.json(JSON.parse(output))
+  const manifest = JSON.parse(output)
+  if (!exists) {
+    await build(pkg)
+    await bundle(pkg, manifest.browser || manifest.module || manifest.main)
+  }
+  res.json(manifest)
 })
 
 router.get('/meta', async (req, res) => {

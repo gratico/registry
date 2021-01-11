@@ -72,8 +72,8 @@ export async function build(pkg) {
   return outputOptions
 }
 
-export async function bundle(pkg) {
-  const { name: pkgName, version: pkgVersion, main } = pkg
+export async function bundle(pkg, main) {
+  const { name: pkgName, version: pkgVersion } = pkg
   await ensureDownload(pkg)
 
   const pkgPath = getFolderRoot('pkgs', `${pkgName}@${pkgVersion}`)
