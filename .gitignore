@@ -1,0 +1,12 @@
+node_modules/
+public/pkgs/**/*
+!public/pkgs/.gitkeep
+
+public/built/**/*
+!public/built/.gitkeep
+
+public/manifests/**/*
+!public/manifests/.gitkeep
+
+public/npm/**/*
+!public/npm/.gitkeep
