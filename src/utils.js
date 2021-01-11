@@ -27,6 +27,27 @@ export async function isDownloaded(pkg) {
   }
 }
 
+export async function forkAndBuild(pkg) {
+  const exists = await isDownloaded(pkg)
+  if (!exists) {
+    await download(pkg)
+  }
+  const pkgPath = getFolderRoot('pkgs', pkg.name + '@' + pkg.version, 'package.json')
+  const output = await promisify(fs.readFile)(pkgPath, 'utf8')
+  const manifest = JSON.parse(output)
+  if (!exists) {
+    const resp = await spawnChild('make', ['build-package'], {
+      env: {
+        PATH: process.env.PATH,
+        NPM_PACKAGE_NAME: pkg.name,
+        NPM_PACKAGE_VERSION: pkg.version,
+        NPM_PACKAGE_MAIN: manifest.module || manifest.main,
+        ROOT_DIR: getFolderRoot()
+      }
+    })
+    console.log(resp)
+  }
+}
 export async function download(pkg) {
   await spawnChild('make', ['download-package'], {
     env: {
