@@ -10,7 +10,7 @@ export const router = express.Router()
 router.get('/manifest', async (req, res) => {
   const pkg = { name: req.packageName, version: req.packageVersion }
   await ensureDownload(pkg)
-  const pkgPath = getFolderRoot('public', 'pkgs', pkg.name + '@' + pkg.version, 'package.json')
+  const pkgPath = getFolderRoot('pkgs', pkg.name + '@' + pkg.version, 'package.json')
   const output = await promisify(fs.readFile)(pkgPath, 'utf8')
   res.json(JSON.parse(output))
 })
@@ -18,7 +18,7 @@ router.get('/manifest', async (req, res) => {
 router.get('/meta', async (req, res) => {
   const pkg = { name: req.packageName, version: req.packageVersion }
   await ensureDownload(pkg)
-  const pkgPath = getFolderRoot('public', 'pkgs', pkg.name + '@' + pkg.version)
+  const pkgPath = getFolderRoot('pkgs', pkg.name + '@' + pkg.version)
   const output = await glob(pkgPath + '/**/*')
   res.json(output)
 })
