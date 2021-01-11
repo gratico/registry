@@ -2,6 +2,10 @@
 install:
 	yarn install --prefer-offline
 
+.PHONY: start
+start:
+	node ./src/index.js --experimental-modules
+
 .PHONY: bundle-package
 bundle-package:
 	mkdir -p public/manifests/${NPM_PACKAGE_NAME}@${NPM_PACKAGE_VERSON}
