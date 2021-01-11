@@ -32,7 +32,8 @@ export async function download(pkg) {
     env: {
       PATH: process.env.PATH,
       NPM_PACKAGE_NAME: pkg.name,
-      NPM_PACKAGE_VERSION: pkg.version
+      NPM_PACKAGE_VERSION: pkg.version,
+      ROOT_DIR: getFolderRoot()
     }
   })
 }
