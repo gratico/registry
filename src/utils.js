@@ -79,7 +79,6 @@ export function getFlattenedTree(lTree) {
     },
     {
       getChildren: (node) => {
-        console.log('n', node)
         return node.dependencies ? [...node.dependencies.values()] : []
       }
     }

@@ -2,6 +2,7 @@ import { getFolderRoot, ensureDownload } from './utils.js'
 import esbuild from 'esbuild'
 import glob from 'glob'
 import path from 'path'
+import { promisify } from 'util'
 
 const { startService } = esbuild
 ;(async () => {
@@ -11,33 +12,35 @@ const { startService } = esbuild
       version: process.env.NPM_PACKAGE_VERSION,
       main: process.env.NPM_PACKAGE_MAIN
     }
-    await build(pkg)
-    await bundle(pkg, pkg.main)
+    const service = await startService()
+    await build(pkg, service)
+    await bundle(pkg, pkg.main, service)
+    await service.stop()
   } catch (e) {
     console.error(e)
     process.exit(1)
   }
 })()
 
-export async function build(pkg) {
+export async function build(pkg, service) {
   const { name: pkgName, version: pkgVersion } = pkg
   await ensureDownload(pkg)
 
   const pkgPath = getFolderRoot('pkgs', `${pkgName}@${pkgVersion}`)
 
-  const inputFiles = await glob(pkgPath + '/**/*.js')
+  const inputFiles = await promisify(glob)(pkgPath + '/**/*.js')
 
-  console.log('bundle ', pkg)
-  const service = startService()
-  ;(await service).build({
-    input: inputFiles,
+  console.log('bundle ', pkg, pkgPath, inputFiles)
+  const resp = await service.build({
+    entryPoints: inputFiles,
     format: 'esm',
+    platform: 'node',
     outdir: getFolderRoot('npm', `${pkgName}@${pkgVersion}`)
   })
-  ;(await service).stop()
+  console.log('r', resp)
 }
 
-export async function bundle(pkg, main) {
+export async function bundle(pkg, main, service) {
   const { name: pkgName, version: pkgVersion } = pkg
   await ensureDownload(pkg)
 
@@ -45,13 +48,14 @@ export async function bundle(pkg, main) {
 
   // create a bundle
   console.log('bundle ', pkg)
-  const service = startService()
-  ;(await service).build({
-    input: path.join(pkgPath, main || 'index.js'),
+  await service.build({
+    entryPoints: [path.join(pkgPath, main || 'index.js')],
     format: 'esm',
+    bundle: true,
+    sourcemap: true,
+    platform: 'node',
     outfile: getFolderRoot('built', `${pkgName}@${pkgVersion}`, 'esm.js')
   })
-  ;(await service).stop()
 
   return {}
 }
