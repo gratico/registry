@@ -2,10 +2,7 @@ import { rollup } from 'rollup'
 import path from 'path'
 import process from 'process'
 import glob from 'glob'
-import cjsPlugin from '@rollup/plugin-commonjs'
-import flowPlugin from 'rollup-plugin-flow'
-import nodeResolvePlugin from '@rollup/plugin-node-resolve'
-import jsonPlugin from '@rollup/plugin-json'
+
 import { spawnChild } from './process.js'
 import fs from 'fs'
 import { promisify } from 'util'
@@ -13,22 +10,6 @@ import logicalTree from 'npm-logical-tree'
 import async from 'async'
 import crawl from 'tree-crawl'
 
-const ignoreFlowPlugin = () => {
-  return {
-    name: 'ignoreflow',
-    transform(code, id) {
-      const line = (code || '').split(/\r?\n/)[0] || ''
-      if (line.match(/@flow/)) {
-        return {
-          code: ``
-        }
-      } else {
-        return { code }
-      }
-    }
-  }
-}
-const plugins = [jsonPlugin(), ignoreFlowPlugin(), cjsPlugin()]
 export function getFolderRoot(...paths) {
   if (process.env.NPM_ROOT) {
     const p = path.join(...[process.env.NPM_ROOT, ...(paths || [])])
@@ -52,7 +33,7 @@ export async function isDownloaded(pkg) {
 export async function forkAndBuild(pkg) {
   const exists = await isDownloaded(pkg)
   if (!exists) {
-    await download(pkg)
+    await forkAndDownload(pkg)
   }
   const pkgPath = getFolderRoot('pkgs', pkg.name + '@' + pkg.version, 'package.json')
   const output = await promisify(fs.readFile)(pkgPath, 'utf8')
@@ -71,7 +52,7 @@ export async function forkAndBuild(pkg) {
     console.log(resp)
   }
 }
-export async function download(pkg) {
+export async function forkAndDownload(pkg) {
   await spawnChild('make', ['download-package'], {
     env: {
       NPM_ROOT: process.env.NPM_ROOT,
@@ -128,63 +109,5 @@ export async function install(job) {
 export async function ensureDownload(pkg) {
   const exists = await isDownloaded(pkg)
   if (exists) return
-  return download(pkg)
-}
-
-export async function build(pkg) {
-  const { name: pkgName, version: pkgVersion } = pkg
-  await ensureDownload(pkg)
-
-  const pkgPath = getFolderRoot('pkgs', `${pkgName}@${pkgVersion}`)
-
-  const inputOptions = {
-    input: glob.sync(pkgPath + '/**/*.js'),
-    plugins,
-    treeshake: false
-  }
-  const outputOptions = {
-    preserveModules: true,
-    dir: getFolderRoot('npm', `${pkgName}@${pkgVersion}`),
-    format: 'esm'
-  }
-  // create a bundle
-
-  const bundle = await rollup(inputOptions)
-  const { output } = await bundle.generate(outputOptions)
-
-  await bundle.write(outputOptions)
-
-  // closes the bundle
-  await bundle.close()
-
-  return outputOptions
-}
-
-export async function bundle(pkg, main) {
-  const { name: pkgName, version: pkgVersion } = pkg
-  await ensureDownload(pkg)
-
-  const pkgPath = getFolderRoot('pkgs', `${pkgName}@${pkgVersion}`)
-
-  const inputOptions = {
-    input: path.join(pkgPath, main || 'index.js'),
-    plugins,
-    treeshake: false
-  }
-  const outputOptions = {
-    file: getFolderRoot('built', `${pkgName}@${pkgVersion}`, 'esm.js'),
-    format: 'esm'
-  }
-
-  // create a bundle
-  console.log('bundle ', pkg)
-
-  const bundle = await rollup(inputOptions)
-  const { output } = await bundle.generate(outputOptions)
-
-  await bundle.write(outputOptions)
-
-  // closes the bundle
-  await bundle.close()
-  return outputOptions
+  return forkAndDownload(pkg)
 }
