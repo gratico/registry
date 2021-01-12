@@ -3,7 +3,39 @@ import esbuild from 'esbuild'
 import glob from 'glob'
 import path from 'path'
 import { promisify } from 'util'
+import { builtinModules } from 'module'
+import fs from 'fs'
 
+let flowDisablePlugin = {
+  name: 'flow ',
+  setup(build) {
+    // Load ".txt" files and return an array of words
+    build.onLoad({ filter: /\.js$/ }, async (args) => {
+      let text = await fs.promises.readFile(args.path, 'utf8')
+      const lines = text.split(/\r?\n/) || []
+      const line = lines[0] || ''
+      if (line.match(/@flow/)) {
+        return {
+          contents: ''
+        }
+      } else {
+        return { contents: text }
+      }
+    })
+  }
+}
+
+const markAsExternalPlugin = {
+  name: 'Set non-relative imports as external',
+  setup(build) {
+    build.onResolve({ filter: /.*/ }, (args) => {
+      const external = builtinModules.indexOf(args.path) > -1
+      return { path: args.path, external, namespace: external ? undefined : undefined }
+    })
+  }
+}
+
+const plugins = [flowDisablePlugin]
 const { startService } = esbuild
 ;(async () => {
   try {
@@ -34,7 +66,9 @@ export async function build(pkg, service) {
   const resp = await service.build({
     entryPoints: inputFiles,
     format: 'esm',
-    platform: 'node',
+    sourcemap: true,
+
+    plugins,
     outdir: getFolderRoot('npm', `${pkgName}@${pkgVersion}`)
   })
   console.log('r', resp)
@@ -53,7 +87,8 @@ export async function bundle(pkg, main, service) {
     format: 'esm',
     bundle: true,
     sourcemap: true,
-    platform: 'node',
+    external: builtinModules,
+    plugins,
     outfile: getFolderRoot('built', `${pkgName}@${pkgVersion}`, 'esm.js')
   })
 

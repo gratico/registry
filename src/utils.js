@@ -91,8 +91,9 @@ export async function install(job) {
   const lTree = logicalTree(manifest, lockfile)
   const nodes = getFlattenedTree(lTree)
   console.log(nodes.length)
-  const tasks = nodes.map((pkg) => {
+  const tasks = nodes.map((pkg, i) => {
     return async (cb) => {
+      console.log('building i', i)
       try {
         await forkAndBuild(pkg)
       } catch (e) {

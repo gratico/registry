@@ -30,7 +30,6 @@
     ".cache",
     "node_modules"
   ],
-  "description": "",
   "keywords": [],
   "author": "Abhishiv Saxena <abhishiv@gmail.com>",
   "license": "UNLICENSED",
@@ -61,5 +60,17 @@
   },
   "devDependencies": {
     "flow-annotation-check": "^1.11.4"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gratico/registry.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gratico/registry/issues"
+  },
+  "homepage": "https://github.com/gratico/registry#readme",
+  "description": ""
 }
