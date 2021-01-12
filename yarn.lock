@@ -515,6 +515,11 @@ encodeurl@~1.0.2:
   resolved "https://registry.npmjs.org/encodeurl/-/encodeurl-1.0.2.tgz#ad3ff4c86ec2d029322f5a02c3a9a606c95b3f59"
   integrity sha1-rT/0yG7C0CkyL1oCw6mmBslbP1k=
 
+esbuild@^0.8.31:
+  version "0.8.31"
+  resolved "https://registry.npmjs.org/esbuild/-/esbuild-0.8.31.tgz#c21e7adb3ad283c951a53de7ad64a5ae2df2ed34"
+  integrity sha512-7EIU0VdUxltwivjVezX3HgeNzeIVR1snkrAo57WdUnuBMykdzin5rTrxwCDM6xQqj0RL/HjOEm3wFr2ijHKeaA==
+
 escape-html@~1.0.3:
   version "1.0.3"
   resolved "https://registry.npmjs.org/escape-html/-/escape-html-1.0.3.tgz#0258eae4d3d0c0974de1c169188ef0051d1d1988"
